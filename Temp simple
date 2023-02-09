@@ -1,0 +1,7 @@
+fahr = (temperature * 9/5) + 32; // Convert temperature from Celsius to Fahrenheit
+
+//Display temperature in Fahrenheit
+lcd.setCursor(9, 1);
+lcd.print(fahr);
+lcd.print((char)223); // Display degree symbol
+lcd.print("F");
