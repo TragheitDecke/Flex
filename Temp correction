@@ -1,0 +1,74 @@
+#include <LiquidCrystal.h> //LCD library
+
+// initialize the LCD library with the numbers of the interface pins 
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7); //LCD Keypad Shield
+
+int inpPin = 8;     // define input pin to 8
+int outPin = 11;    // define PWM output, possible pins with LCD and 32khz freq. are 3 and 11 (Nano and Uno)
+
+// Define global variables
+volatile uint16_t revTick;    // Ticks per revolution
+uint16_t pwm_output  = 0;     // integer for storing PWM value (0-255 value)
+int HZ;                   // unsigned 16-bit integer for storing HZ input
+int ethanol = 0;              // Store ethanol percentage here
+float expectedv;              // store expected voltage here - range for typical GM sensors is usually 0.5-4.5v
+
+int duty;                     // Duty cycle (0.0-100.0)
+float period;                 // Store period time here (e.g. 0.0025 s)
+float temperature = 0;        // Store fuel temperature here
+int fahr = 0;
+int celsius = 0;
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(inpPin, INPUT);
+  analogWrite(outPin, pwm_output);
+  
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+  lcd.print("Ethanol:    %");
+  lcd.setCursor(0, 1);
+  lcd.print("     Hz       C");
+}
+
+void getfueltemp(int inpPin)
+{
+  // Implementation for reading fuel temperature from input duty cycle
+}
+
+void loop()
+{
+  getfueltemp(inpPin);
+  
+  if (revTick > 0)
+  {
+    HZ = 62200 / revTick;
+  }
+
+  if (HZ > 50)
+  {
+    ethanol = (HZ - 50);
+  }
+  else
+  {
+    ethanol = 0;
+  }
+
+  if (ethanol > 99)
+  {
+    ethanol = 99;
+  }
+
+  expectedv = ((((HZ - 50.0) * 0.01) * 4) + 0.5);
+  pwm_output = 1.1 * (255 * (expectedv / 5.0));
+  
+  lcd.setCursor(10, 0);
+  lcd.print(ethanol);
+  
+  lcd.setCursor(2, 1);
+  lcd.print(HZ);
+  
+  lcd.setCursor(12, 1);
+  lcd.print(temperature);
+}
